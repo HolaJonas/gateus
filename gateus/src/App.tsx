@@ -1,13 +1,11 @@
 import Header from "./components/header/Header"
-
+import Canvas from "./components/canvas/Canvas"
 
 function App() {
   return (
-    <div className="bg-red-100 min-h-screen flex">
-      <Header/>
-      <div className="">
-
-      </div>
+    <div className="bg-red-100 h-screen flex-1">
+      <Header />
+      <Canvas />
     </div>
   );
 }

@@ -5,7 +5,7 @@
  * @returns {JSX.Element} Header bar with according buttons.
  */
 
-function Header() {
+export default function Header() {
   return (
     <div className="w-full h-16 bg-red-600 shadow border-red-400 border relative flex items-center">
       Logo
@@ -26,5 +26,3 @@ function Header() {
     </div>
   );
 }
-
-export default Header;
