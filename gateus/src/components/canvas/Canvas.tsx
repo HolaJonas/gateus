@@ -18,6 +18,12 @@ export default function Canvas() {
       position: { x: 0, y: 0 },
       data: { value: 123 },
     },
+    {
+      id: "node-2",
+      type: "andNode",
+      position: { x: 100, y: 0 },
+      data: { value: 1 },
+    },
   ]);
   const [edges, setEdges] = useState(initialEdges);
 

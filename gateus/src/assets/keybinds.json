@@ -1,0 +1,10 @@
+{
+  "SingleNode": {
+    "Rotation": {
+      "Top": "w",
+      "Bottom": "s",
+      "Left": "a",
+      "Right": "d"
+    }
+  }
+}
