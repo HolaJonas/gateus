@@ -4,9 +4,17 @@ import {
   applyNodeChanges,
   applyEdgeChanges,
   addEdge,
+  Background,
+  BackgroundVariant,
+  MiniMap,
+  Controls,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import AndNode from "./AndNode";
+import BaseNode from "./BaseNode";
+
+const AndNode = (props: any) => <BaseNode {...props} dynamicHandles={true} design={<div className="rounded-t-xl bg-red-600 w-10 h-7"/>} logicFunction={(input) => input.length > 0 && input.every((value) => value === true)}/>;
+const NotNode = (props: any) => <BaseNode {...props} design={<div className="w-5 h-5 flex bg-blue-600" />} logicFunction={(input) => !input[0]} defaultIn={1} dynamicHandles={false} />
+
 
 const initialEdges: any = [];
 
@@ -16,13 +24,19 @@ export default function Canvas() {
       id: "node-1",
       type: "andNode",
       position: { x: 0, y: 0 },
-      data: { value: 123 },
+      data: { value: false },
     },
     {
       id: "node-2",
-      type: "andNode",
+      type: "notNode",
       position: { x: 100, y: 0 },
-      data: { value: 1 },
+      data: { value: false },
+    },
+        {
+      id: "node-3",
+      type: "andNode",
+      position: { x: 200, y: 0 },
+      data: { value: false },
     },
   ]);
   const [edges, setEdges] = useState(initialEdges);
@@ -53,9 +67,18 @@ export default function Canvas() {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
-        nodeTypes={{ andNode: AndNode }}
+        nodeTypes={{ andNode: AndNode, notNode: NotNode }}
+        defaultEdgeOptions={{ type: "smoothstep" }}
         fitView
-      />
+      >
+        <MiniMap />
+        <Controls/>
+        <Background
+          gap={20}
+          color="#ccc"
+          variant={BackgroundVariant.Lines}
+        />
+      </ReactFlow>
     </div>
   );
 }
