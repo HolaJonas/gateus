@@ -11,10 +11,34 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import BaseNode from "./BaseNode";
+import ToggleNode from "./ToggleNode";
 
-const AndNode = (props: any) => <BaseNode {...props} dynamicHandles={true} design={<div className="rounded-t-xl bg-red-600 w-10 h-7"/>} logicFunction={(input) => input.length > 0 && input.every((value) => value === true)}/>;
-const NotNode = (props: any) => <BaseNode {...props} design={<div className="w-5 h-5 flex bg-blue-600" />} logicFunction={(input) => !input[0]} defaultIn={1} dynamicHandles={false} />
+const AndNode = (props: any) => (
+  <BaseNode
+    {...props}
+    dynamicHandles={true}
+    design={<div className="rounded-t-xl bg-red-600 w-10 h-7" />}
+    logicFunction={(input) =>
+      input.length > 0 && input.every((value) => value === true)
+    }
+  />
+);
+const NotNode = (props: any) => (
+  <BaseNode
+    {...props}
+    design={<div className="w-5 h-5 flex bg-blue-600" />}
+    logicFunction={(input) => !input[0]}
+    defaultIn={1}
+    dynamicHandles={false}
+  />
+);
 
+const SourceNode = (props: any) => (
+  <ToggleNode
+    {...props}
+    design={<div className="w-7 h-7 flex bg-orange-500 rounded-full" />}
+  />
+);
 
 const initialEdges: any = [];
 
@@ -32,10 +56,16 @@ export default function Canvas() {
       position: { x: 100, y: 0 },
       data: { value: false },
     },
-        {
+    {
       id: "node-3",
       type: "andNode",
       position: { x: 200, y: 0 },
+      data: { value: false },
+    },
+    {
+      id: "node-4",
+      type: "sourceNode",
+      position: { x: 300, y: 0 },
       data: { value: false },
     },
   ]);
@@ -67,17 +97,18 @@ export default function Canvas() {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
-        nodeTypes={{ andNode: AndNode, notNode: NotNode }}
+        nodeTypes={{
+          andNode: AndNode,
+          notNode: NotNode,
+          sourceNode: SourceNode,
+        }}
         defaultEdgeOptions={{ type: "smoothstep" }}
         fitView
+        proOptions={{ hideAttribution: true }}
       >
         <MiniMap />
-        <Controls/>
-        <Background
-          gap={20}
-          color="#ccc"
-          variant={BackgroundVariant.Lines}
-        />
+        <Controls />
+        <Background gap={20} color="#ccc" variant={BackgroundVariant.Lines} />
       </ReactFlow>
     </div>
   );

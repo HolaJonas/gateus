@@ -5,10 +5,10 @@ import { useEffect, useRef } from "react";
  * Select a node, type any number and confirm by ENTER to apply changes.
  *
  * @export
- * @param {boolean} selected 
- * @param {(numberOfHandles: number) => void} onHandleNumberChange 
+ * @param {boolean} selected
+ * @param {(numberOfHandles: number) => void} onHandleNumberChange
  */
-export default function useHandleNumberKeys(
+export default function useNumberKeys(
   selected: boolean,
   onHandleNumberChange: (numberOfHandles: number) => void
 ) {

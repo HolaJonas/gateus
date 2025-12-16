@@ -5,9 +5,10 @@ import {
   type NodeProps,
 } from "@xyflow/react";
 import { useEffect, useState, type ReactNode } from "react";
-import useHandleNumberKeys from "../../hooks/useNumberKeys";
+import useNumberKeys from "../../hooks/useNumberKeys";
 import useDirectionKeys from "../../hooks/useDirectionKeys";
 import AlignedHandles from "./AlignedHandles";
+import useInteractKey from "../../hooks/useInteractKey";
 
 interface BaseNodeProps extends NodeProps {
   dynamicHandles: boolean;
@@ -15,7 +16,9 @@ interface BaseNodeProps extends NodeProps {
   defaultIn: number;
   defaultOut: number;
   rotatable: boolean;
+  interactable: boolean;
   logicFunction: (inputs: boolean[]) => boolean;
+  onInteract?: () => void;
 }
 
 export default function BaseNode({
@@ -27,7 +30,9 @@ export default function BaseNode({
   defaultIn = 2,
   defaultOut = 1,
   rotatable = true,
+  interactable = false,
   logicFunction,
+  onInteract,
 }: BaseNodeProps) {
   const [handleCount, setHandleCount] = useState(defaultIn);
   const [direction, setDirection] = useState(0);
@@ -41,16 +46,17 @@ export default function BaseNode({
       (node) => Boolean(node?.data?.value) ?? false
     );
 
-    const result = connections.length === handleCount ? logicFunction(inputValues) : false;
+    const result =
+      connections.length === handleCount ? logicFunction(inputValues) : false;
 
     if (data.value !== result) {
-      console.log(id + " " + result);
       updateNodeData(id, { value: result });
     }
   }, [connectedNodesData, id, updateNodeData, data.value, connections.length]);
 
-  if (dynamicHandles) useHandleNumberKeys(selected, setHandleCount);
+  if (dynamicHandles) useNumberKeys(selected, setHandleCount);
   if (rotatable) useDirectionKeys(selected, setDirection);
+  if (interactable && onInteract) useInteractKey(selected, onInteract);
 
   return (
     <div
