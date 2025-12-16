@@ -5,6 +5,15 @@ interface AlignedHandlesProps {
   type: "target" | "source";
 }
 
+/**
+ * Component used in nodes to dynamically generate evenly spaced handles.
+ *
+ * @export
+ * @param {AlignedHandlesProps} param0
+ * @param {number} param0.numberOfHandles number of handles
+ * @param {("target" | "source")} param0.type type of handles
+ * @returns {*}
+ */
 export default function AlignedHandles({
   numberOfHandles,
   type,

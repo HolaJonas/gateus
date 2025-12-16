@@ -7,6 +7,14 @@ interface ToggleNodeProps extends NodeProps {
   rotatable: boolean;
 }
 
+/**
+ * The implementation of the special ToggleNode. Is meant to be used as a source node.
+ * Special due to interactivity.
+ *
+ * @export
+ * @param {ToggleNodeProps} props
+ * @returns {*}
+ */
 export default function ToggleNode(props: ToggleNodeProps) {
   const { updateNodeData } = useReactFlow();
 

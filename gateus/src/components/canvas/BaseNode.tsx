@@ -21,11 +21,29 @@ interface BaseNodeProps extends NodeProps {
   onInteract?: () => void;
 }
 
+/**
+ * The basic logic gate node. Can be used to implement any boolean function as a node on the canvas.
+ *
+ * @export
+ * @param {BaseNodeProps} param0
+ * @param {*} param0.id id of the node
+ * @param {*} param0.selected is the node selected?
+ * @param {*} param0.data json data of the node
+ * @param {boolean=true} param0.dynamicHandles allow dynamic handles using number keys?
+ * @param {ReactNode} param0.design JSX design of the node
+ * @param {number} [param0.defaultIn=2] default number of inputs
+ * @param {number} [param0.defaultOut=1] default number of outputs
+ * @param {boolean} [param0.rotatable=true] is the node rotatable?
+ * @param {boolean} [param0.interactable=false] is the node an interaction-node?
+ * @param {(inputs: {}) => boolean} param0.logicFunction boolean function of the node
+ * @param {() => void} param0.onInteract interaction function of the node
+ * @returns {*}
+ */
 export default function BaseNode({
   id,
   selected,
   data,
-  dynamicHandles,
+  dynamicHandles = true,
   design,
   defaultIn = 2,
   defaultOut = 1,

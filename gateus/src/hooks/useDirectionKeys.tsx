@@ -5,8 +5,8 @@ import Keybinds from "../assets/keybinds.json";
  * A hook for Nodes to allow rotation using predefined keybinds from keybinds.json.
  *
  * @export
- * @param {boolean} selected
- * @param {(direction: number) => void} onDirectionChange
+ * @param {boolean} selected selected parameter of node props
+ * @param {(direction: number) => void} onDirectionChange function to manipulate node's direction state
  */
 export default function useDirectionKeys(
   selected: boolean,

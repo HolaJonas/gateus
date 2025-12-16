@@ -5,8 +5,8 @@ import { useEffect, useRef } from "react";
  * Select a node, type any number and confirm by ENTER to apply changes.
  *
  * @export
- * @param {boolean} selected
- * @param {(numberOfHandles: number) => void} onHandleNumberChange
+ * @param {boolean} selected selected parameter of node props
+ * @param {(numberOfHandles: number) => void} onHandleNumberChange function to manipulate node's numberOfHandles state
  */
 export default function useNumberKeys(
   selected: boolean,
