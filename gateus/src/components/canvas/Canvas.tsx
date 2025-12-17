@@ -11,16 +11,14 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import BaseNode from "./BaseNode";
-import ToggleNode from "./ToggleNode";
+import GateMenu from "./GateMenu";
 
 const AndNode = (props: any) => (
   <BaseNode
     {...props}
     dynamicHandles={true}
     design={<div className="rounded-t-xl bg-red-600 w-10 h-7" />}
-    logicFunction={(input) =>
-      input.length > 0 && input.every((value) => value === true)
-    }
+    logicFunction={(input) => input.every((value) => value === true)}
   />
 );
 const NotNode = (props: any) => (
@@ -34,9 +32,27 @@ const NotNode = (props: any) => (
 );
 
 const SourceNode = (props: any) => (
-  <ToggleNode
+  <BaseNode
     {...props}
+    defaultOut={1}
+    defaultIn={0}
     design={<div className="w-7 h-7 flex bg-orange-500 rounded-full" />}
+    logicFunction={() => Boolean(props.data.value)}
+    dynamicHandles={false}
+    interactable={true}
+    stateful={true}
+  />
+);
+
+const TestNode = (props: any) => (
+  <BaseNode
+    {...props}
+    design={<div className="w-9 h-9 bg-cyan-600 flex" />}
+    logicFunction={(input) =>
+      (!input[0] && input[1]) || (input[0] && !input[1])
+    }
+    defaultIn={3}
+    dynamicHandles={false}
   />
 );
 
@@ -52,13 +68,13 @@ export default function Canvas() {
     },
     {
       id: "node-2",
-      type: "notNode",
+      type: "sourceNode",
       position: { x: 100, y: 0 },
       data: { value: false },
     },
     {
       id: "node-3",
-      type: "andNode",
+      type: "sourceNode",
       position: { x: 200, y: 0 },
       data: { value: false },
     },
@@ -66,6 +82,12 @@ export default function Canvas() {
       id: "node-4",
       type: "sourceNode",
       position: { x: 300, y: 0 },
+      data: { value: false },
+    },
+    {
+      id: "node-5",
+      type: "testNode",
+      position: { x: 400, y: 0 },
       data: { value: false },
     },
   ]);
@@ -91,6 +113,7 @@ export default function Canvas() {
 
   return (
     <div className="flex-1 w-full h-full relative">
+      <GateMenu />
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -101,6 +124,7 @@ export default function Canvas() {
           andNode: AndNode,
           notNode: NotNode,
           sourceNode: SourceNode,
+          testNode: TestNode,
         }}
         defaultEdgeOptions={{ type: "smoothstep" }}
         fitView

@@ -4,7 +4,7 @@ import {
   useReactFlow,
   type NodeProps,
 } from "@xyflow/react";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode, useCallback } from "react";
 import useNumberKeys from "../../hooks/useNumberKeys";
 import useDirectionKeys from "../../hooks/useDirectionKeys";
 import AlignedHandles from "./AlignedHandles";
@@ -59,6 +59,10 @@ export default function BaseNode({
   const connectedNodesData = useNodesData(sourceNodeIds);
   const { updateNodeData } = useReactFlow();
 
+  const handleToggle = useCallback(() => {
+    updateNodeData(id, { value: !data.value });
+  }, [id, data.value, updateNodeData]);
+
   useEffect(() => {
     const inputValues = connectedNodesData.map(
       (node) => Boolean(node?.data?.value) ?? false
@@ -74,7 +78,7 @@ export default function BaseNode({
 
   if (dynamicHandles) useNumberKeys(selected, setHandleCount);
   if (rotatable) useDirectionKeys(selected, setDirection);
-  if (interactable && onInteract) useInteractKey(selected, onInteract);
+  if (interactable) useInteractKey(selected, onInteract || handleToggle);
 
   return (
     <div
