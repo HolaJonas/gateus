@@ -17,6 +17,14 @@ interface BaseNodeProps extends NodeProps {
   defaultOut: number;
   rotatable: boolean;
   interactable: boolean;
+  category:
+    | "input"
+    | "output"
+    | "gates"
+    | "sequential"
+    | "annotation"
+    | "misc"
+    | "custom";
   logicFunction: (inputs: boolean[]) => boolean;
   onInteract?: () => void;
 }
@@ -33,6 +41,7 @@ interface BaseNodeProps extends NodeProps {
  * @param {ReactNode} param0.design JSX design of the node
  * @param {number} [param0.defaultIn=2] default number of inputs
  * @param {number} [param0.defaultOut=1] default number of outputs
+ * @param {"input"| "output" | "gates" | "sequential" | "annotation" | "misc" | "custom"} [param0.category] category of the gate
  * @param {boolean} [param0.rotatable=true] is the node rotatable?
  * @param {boolean} [param0.interactable=false] is the node an interaction-node?
  * @param {(inputs: {}) => boolean} param0.logicFunction boolean function of the node
@@ -45,6 +54,7 @@ export default function BaseNode({
   data,
   dynamicHandles = true,
   design,
+  category,
   defaultIn = 2,
   defaultOut = 1,
   rotatable = true,
@@ -62,6 +72,12 @@ export default function BaseNode({
   const handleToggle = useCallback(() => {
     updateNodeData(id, { value: !data.value });
   }, [id, data.value, updateNodeData]);
+
+  useEffect(() => {
+    if (data.category !== category) {
+      updateNodeData(id, { category });
+    }
+  }, [id, category, data.category, updateNodeData]);
 
   useEffect(() => {
     const inputValues = connectedNodesData.map(
@@ -89,10 +105,10 @@ export default function BaseNode({
       }}
       className={data.value ? "opacity-100" : "opacity-50"}
     >
-      <AlignedHandles numberOfHandles={defaultOut} type="source" />
       <div className={data.value ? "brightness-125" : "brightness-75"}>
         {design}
       </div>
+      <AlignedHandles numberOfHandles={defaultOut} type="source" />
       <AlignedHandles numberOfHandles={handleCount} type="target" />
     </div>
   );
