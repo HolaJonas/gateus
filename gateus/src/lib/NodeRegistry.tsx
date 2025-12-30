@@ -40,7 +40,7 @@ const SourceNode = (props: any) => (
   />
 );
 
-const TestNode = (props: any) => (
+const XorNode = (props: any) => (
   <BaseNode
     {...props}
     design={<div className="w-9 h-9 bg-cyan-600 flex" />}
@@ -49,8 +49,20 @@ const TestNode = (props: any) => (
     }
     defaultIn={3}
     dynamicHandles={false}
-    category="custom"
+    category="gate"
   />
 );
 
-export { AndNode, NotNode, SourceNode, TestNode };
+const CustomNode = (props: any) => (
+  <BaseNode
+    {...props}
+    design={<div className="bg-white w-10 h-16 flex" />}
+    logicFunction={() => true}
+    defaultIn={0}
+    defaultOut={1}
+    category="custom"
+    dynamicHandles={false}
+  />
+);
+
+export { AndNode, NotNode, SourceNode, XorNode, CustomNode };

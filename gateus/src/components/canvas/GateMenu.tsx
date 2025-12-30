@@ -53,7 +53,13 @@ export default function GateMenu() {
             />
             <div
               className="w-10 h-10 bg-yellow-600 cursor-grab active:cursor-grabbing"
-              onDragStart={(event) => onDragStart(event, "testNode")}
+              onDragStart={(event) => onDragStart(event, "xorNode")}
+              onMouseDown={onMouseDown}
+              draggable
+            />
+            <div
+              className="w-10 h-10 bg-lime-500 cursor-grab active:cursor-grabbing"
+              onDragStart={(event) => onDragStart(event, "customNode")}
               onMouseDown={onMouseDown}
               draggable
             />

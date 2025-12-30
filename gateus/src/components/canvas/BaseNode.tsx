@@ -75,7 +75,7 @@ export default function BaseNode({
 
   useEffect(() => {
     if (data.category !== category) {
-      updateNodeData(id, { category });
+      updateNodeData(id, { ...data, category: category });
     }
   }, [id, category, data.category, updateNodeData]);
 

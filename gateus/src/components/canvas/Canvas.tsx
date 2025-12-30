@@ -1,4 +1,4 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
   ReactFlow,
   addEdge,
@@ -6,15 +6,35 @@ import {
   BackgroundVariant,
   MiniMap,
   Controls,
+  type Node,
   type Edge,
-  useEdgesState,
   ReactFlowProvider,
+  useReactFlow,
+  applyNodeChanges,
+  applyEdgeChanges,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { AndNode, NotNode, SourceNode, TestNode } from "../../lib/NodeRegistry";
+import {
+  AndNode,
+  NotNode,
+  SourceNode,
+  XorNode,
+  CustomNode,
+} from "../../lib/NodeRegistry";
 import GateMenu from "./GateMenu";
 import { useCanvasDnD } from "../../hooks/useCanvasDnD";
-import { DnDProvider } from "./DnDContext";
+import { DnDProvider, useDnD } from "./DnDContext";
+import TabContainers from "./TabContainers";
+
+export type FlowTab = {
+  id: string;
+  label: string;
+  nodes: Node[];
+  edges: Edge[];
+};
+
+let id = 0;
+const getId = () => `dndnode_${id++}`;
 
 /**
  * A component containing a ReactFlow component with Controls, a Menu and a grid-Background.
@@ -23,33 +43,117 @@ import { DnDProvider } from "./DnDContext";
  *
  * @returns {*}
  */
-function CanvasContent() {
+export function CanvasContent() {
   const reactFlowWrapper = useRef(null);
-  const { nodes, onNodesChange, onDragOver, onDrop } = useCanvasDnD();
-  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
+  const [activeTabId, setActiveTabId] = useState<string>("tab0");
+  const [flows, setFlows] = useState<Record<string, FlowTab>>({
+    tab0: {
+      id: "0",
+      label: "Flow 0",
+      nodes: [
+        {
+          id: "1",
+          position: { x: 0, y: 0 },
+          type: "sourceNode",
+          data: { label: "Node 1" },
+        },
+      ],
+      edges: [],
+    },
+  });
 
-  const onConnect = useCallback(
-    (params: any) => setEdges((eds) => addEdge(params, eds)),
-    []
+  const [type] = useDnD();
+  const { screenToFlowPosition } = useReactFlow();
+
+  const onDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = "move";
+    }
+  }, []);
+
+  const onDrop = useCallback(
+    (event: React.DragEvent<HTMLDivElement>) => {
+      event.preventDefault();
+      if (!type) {
+        return;
+      }
+      const position = screenToFlowPosition({
+        x: event.clientX,
+        y: event.clientY,
+      });
+      const newNode: any = {
+        id: getId(),
+        type,
+        position,
+        data: { value: false },
+      };
+      setFlows((prev) => ({
+        ...prev,
+        [activeTabId]: {
+          ...prev[activeTabId],
+          nodes: prev[activeTabId].nodes.concat(newNode),
+        },
+      }));
+    },
+    [screenToFlowPosition, type, activeTabId]
   );
+  const activeFlow = flows[activeTabId];
+
+  const onNodesChange = (tabId: string, changes: any) => {
+    setFlows((prev) => ({
+      ...prev,
+      [tabId]: {
+        ...prev[tabId],
+        nodes: applyNodeChanges(changes, prev[tabId].nodes),
+      },
+    }));
+  };
+
+  const onEdgesChange = (tabId: string, changes: any) => {
+    setFlows((prev) => ({
+      ...prev,
+      [tabId]: {
+        ...prev[tabId],
+        edges: applyEdgeChanges(changes, prev[tabId].edges),
+      },
+    }));
+  };
+
+  const onConnect = (tabId: string, params: any) => {
+    setFlows((prev) => ({
+      ...prev,
+      [tabId]: {
+        ...prev[tabId],
+        edges: addEdge(params, prev[tabId].edges),
+      },
+    }));
+  };
 
   return (
     <>
+      <TabContainers
+        activeTabId={activeTabId}
+        flows={flows}
+        setActiveTabId={setActiveTabId}
+        setFlows={setFlows}
+      />
       <GateMenu />
       <div className="w-full h-full" ref={reactFlowWrapper}>
         <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onConnect={onConnect}
+          nodes={activeFlow.nodes}
+          edges={activeFlow.edges}
+          onNodesChange={(changes) => onNodesChange(activeTabId, changes)}
+          onEdgesChange={(changes) => onEdgesChange(activeTabId, changes)}
+          onConnect={(params) => onConnect(activeTabId, params)}
           onDrop={onDrop}
           onDragOver={onDragOver}
           nodeTypes={{
             andNode: AndNode,
             notNode: NotNode,
             sourceNode: SourceNode,
-            testNode: TestNode,
+            xorNode: XorNode,
+            customNode: CustomNode,
           }}
           defaultEdgeOptions={{ type: "smoothstep" }}
           fitView
@@ -63,7 +167,6 @@ function CanvasContent() {
     </>
   );
 }
-
 
 /**
  * The main Canvas component containing the whole react flow component with according drag-and-drop menu placement, background and controls.
