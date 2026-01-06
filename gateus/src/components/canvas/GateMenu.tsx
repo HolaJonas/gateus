@@ -2,12 +2,22 @@ import WindowComponent from "react-flexi-window";
 import MenuSection from "./MenuSection";
 import { useDnD } from "./DnDContext";
 import type { DragEvent, MouseEvent } from "react";
+import type { FlowTab } from "./Canvas";
 
-export default function GateMenu() {
+interface GateMenuProps {
+  flows: Record<string, FlowTab>;
+  activeTabId: string;
+}
+
+export default function GateMenu(props: GateMenuProps) {
   const [_, setType] = useDnD();
 
-  const onDragStart = (event: DragEvent<HTMLDivElement>, nodeType: string) => {
-    setType?.(nodeType);
+  const onDragStart = (
+    event: DragEvent<HTMLDivElement>,
+    nodeType: string,
+    flow?: FlowTab
+  ) => {
+    setType?.({ type: nodeType, flow: flow ?? null });
     event.dataTransfer.effectAllowed = "move";
   };
 
@@ -63,6 +73,25 @@ export default function GateMenu() {
               onMouseDown={onMouseDown}
               draggable
             />
+          </div>
+        </MenuSection>
+        <MenuSection sectionHeader="Custom">
+          <div className="flex p-1 gap-1">
+            {Object.entries(props.flows)
+              .filter(([tabId]) => tabId !== props.activeTabId)
+              .map(([tabId, flow]) => (
+                <div
+                  key={tabId}
+                  className="w-10 h-10 bg-orange-500 cursor-grab active:cursor-grabbing"
+                  onDragStart={(event) =>
+                    onDragStart(event, "customNode", flow)
+                  }
+                  onMouseDown={onMouseDown}
+                  draggable
+                >
+                  {flow.label}
+                </div>
+              ))}
           </div>
         </MenuSection>
       </div>
