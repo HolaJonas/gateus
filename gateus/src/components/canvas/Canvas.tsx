@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
   ReactFlow,
   addEdge,
@@ -23,7 +23,6 @@ import {
   CustomNode,
 } from "../../lib/NodeRegistry";
 import GateMenu from "./GateMenu";
-import { useCanvasDnD } from "../../hooks/useCanvasDnD";
 import { DnDProvider, useDnD } from "./DnDContext";
 import TabContainers from "./TabContainers";
 
@@ -65,6 +64,7 @@ export function CanvasContent() {
 
   const [type] = useDnD();
   const { screenToFlowPosition } = useReactFlow();
+  const position = screenToFlowPosition({ x: 100, y: 100 });
 
   const onDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
@@ -100,39 +100,25 @@ export function CanvasContent() {
     [screenToFlowPosition, type, activeTabId]
   );
 
-  // TODO: refactor horrible godfunction
-  const addFlowFromFlowTab = (flow: FlowTab) => {
-    const position = screenToFlowPosition({ x: 100, y: 100 });
+  const countNodeTypes = (flow: FlowTab) => {
     let numberOfInputs = 0;
     let numberOfOutputs = 0;
     flow.nodes.forEach((element) => {
       if (element.type === "sourceNode") numberOfInputs++;
       if (element.type === "outputNode") numberOfOutputs++;
     });
-    const newNodes: Node[] = [];
-    const newEdges: Edge[] = [];
+    return { numberOfInputs: numberOfInputs, numberOfOutputs: numberOfOutputs };
+  };
 
-    const nodeIdMap = new Map<string, string>();
-    const hiddenSourceNodeIds: string[] = [];
-    const hiddenOutputNodeIds: string[] = [];
-
-    const customNodeId = getId();
-    newNodes.push({
-      id: customNodeId,
-      type: "customNode",
-      position: position,
-      data: {
-        value: false,
-        category: "custom",
-        label: flow.label,
-        numberOfInputs: numberOfInputs,
-        numberOfOutputs: numberOfOutputs,
-        hiddenSourceNodeIds: hiddenSourceNodeIds,
-        hiddenOutputNodeIds: hiddenOutputNodeIds,
-      },
-    });
-
+  const createHiddenSourceNodes = (
+    flow: FlowTab,
+    customNodeId: string,
+    nodeIdMap: Map<string, string>,
+    hiddenSourceNodeIds: string[]
+  ) => {
     const sourceNodeInputMap = new Map<string, number>();
+    const newNodes: Node[] = [];
+
     let inputHandleIndex = 0;
     flow.nodes.forEach((node) => {
       if (node.type === "sourceNode") {
@@ -144,10 +130,7 @@ export function CanvasContent() {
         newNodes.push({
           id: hiddenSourceId,
           type: "sourceNode",
-          position: {
-            x: position.x - 200,
-            y: position.y + inputHandleIndex * 50,
-          },
+          position: position,
           data: {
             value: false,
             label: `${flow.label}_input_${inputHandleIndex}`,
@@ -163,9 +146,43 @@ export function CanvasContent() {
         });
       }
     });
+    return { sourceNodeInputMap, newNodes };
+  };
 
+  const createCustomNode = (
+    flow: FlowTab,
+    customNodeId: string,
+    numberOfInputs: number,
+    numberOfOutputs: number,
+    hiddenSourceNodeIds: string[],
+    hiddenOutputNodeIds: string[]
+  ): Node => {
+    return {
+      id: customNodeId,
+      type: "customNode",
+      position: position,
+      data: {
+        value: false,
+        category: "custom",
+        label: flow.label,
+        numberOfInputs: numberOfInputs,
+        numberOfOutputs: numberOfOutputs,
+        hiddenSourceNodeIds: hiddenSourceNodeIds,
+        hiddenOutputNodeIds: hiddenOutputNodeIds,
+      },
+    };
+  };
+
+  const createHiddenOutputNodes = (
+    flow: FlowTab,
+    customNodeId: string,
+    nodeIdMap: Map<string, string>,
+    hiddenOutputNodeIds: string[]
+  ) => {
+    const newNodes: Node[] = [];
     const outputNodeOutputMap = new Map<string, number>();
     let outputHandleIndex = 0;
+
     flow.nodes.forEach((node) => {
       if (node.type === "outputNode") {
         const hiddenOutputId = getId();
@@ -176,10 +193,7 @@ export function CanvasContent() {
         newNodes.push({
           id: hiddenOutputId,
           type: "outputNode",
-          position: {
-            x: position.x + 200,
-            y: position.y + outputHandleIndex * 50,
-          },
+          position: position,
           data: {
             value: false,
             label: `${flow.label}_output_${outputHandleIndex}`,
@@ -196,6 +210,15 @@ export function CanvasContent() {
         });
       }
     });
+
+    return { newNodes, outputNodeOutputMap };
+  };
+
+  const createRegularNodes = (
+    flow: FlowTab,
+    nodeIdMap: Map<string, string>
+  ): Node[] => {
+    const newNodes: Node[] = [];
 
     flow.nodes.forEach((node) => {
       if (node.type === "sourceNode" || node.type === "outputNode") return;
@@ -217,6 +240,15 @@ export function CanvasContent() {
       });
     });
 
+    return newNodes;
+  };
+
+  const createFlowEdges = (
+    flow: FlowTab,
+    nodeIdMap: Map<string, string>
+  ): Edge[] => {
+    const newEdges: Edge[] = [];
+
     flow.edges.forEach((edge) => {
       const sourceId = nodeIdMap.get(edge.source);
       const targetId = nodeIdMap.get(edge.target);
@@ -235,11 +267,54 @@ export function CanvasContent() {
       }
     });
 
+    return newEdges;
+  };
+
+  const addFlowFromFlowTab = (flow: FlowTab) => {
+    const { numberOfInputs, numberOfOutputs } = countNodeTypes(flow);
+    const nodeIdMap = new Map<string, string>();
+    const hiddenSourceNodeIds: string[] = [];
+    const hiddenOutputNodeIds: string[] = [];
+    const customNodeId = getId();
+
+    const customNode = createCustomNode(
+      flow,
+      customNodeId,
+      numberOfInputs,
+      numberOfOutputs,
+      hiddenSourceNodeIds,
+      hiddenOutputNodeIds
+    );
+
+    const { newNodes: hiddenSourceNodes } = createHiddenSourceNodes(
+      flow,
+      customNodeId,
+      nodeIdMap,
+      hiddenSourceNodeIds
+    );
+
+    const { newNodes: hiddenOutputNodes } = createHiddenOutputNodes(
+      flow,
+      customNodeId,
+      nodeIdMap,
+      hiddenOutputNodeIds
+    );
+
+    const regularNodes = createRegularNodes(flow, nodeIdMap);
+    const newEdges = createFlowEdges(flow, nodeIdMap);
+
+    const allNodes = [
+      customNode,
+      ...hiddenSourceNodes,
+      ...hiddenOutputNodes,
+      ...regularNodes,
+    ];
+
     setFlows((prev) => ({
       ...prev,
       [activeTabId]: {
         ...prev[activeTabId],
-        nodes: prev[activeTabId].nodes.concat(newNodes),
+        nodes: prev[activeTabId].nodes.concat(allNodes),
         edges: prev[activeTabId].edges.concat(newEdges),
       },
     }));
