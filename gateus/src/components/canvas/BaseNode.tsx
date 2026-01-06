@@ -80,9 +80,24 @@ export default function BaseNode({
   }, [id, category, data.category, updateNodeData]);
 
   useEffect(() => {
-    const inputValues = connectedNodesData.map(
-      (node) => Boolean(node?.data?.value) ?? false
-    );
+    const inputValues = connectedNodesData.map((node, index) => {
+      if (!node) return false;
+
+      if (node.type === "customNode") {
+        const connection = connections[index];
+        const sourceHandle = connection?.sourceHandle;
+
+        if (sourceHandle && node.data?.outputValues) {
+          const outputKey = sourceHandle.replace("source-", "output-");
+          const outputValues = node.data.outputValues as Record<
+            string,
+            boolean
+          >;
+          return Boolean(outputValues[outputKey]) ?? false;
+        }
+      }
+      return Boolean(node?.data?.value) ?? false;
+    });
 
     const result =
       connections.length === handleCount ? logicFunction(inputValues) : false;
@@ -90,7 +105,16 @@ export default function BaseNode({
     if (data.value !== result) {
       updateNodeData(id, { value: result });
     }
-  }, [connectedNodesData, id, updateNodeData, data.value, connections.length]);
+  }, [
+    connectedNodesData,
+    id,
+    updateNodeData,
+    data.value,
+    connections.length,
+    connections,
+    handleCount,
+    logicFunction,
+  ]);
 
   if (dynamicHandles) useNumberKeys(selected, setHandleCount);
   if (rotatable) useDirectionKeys(selected, setDirection);

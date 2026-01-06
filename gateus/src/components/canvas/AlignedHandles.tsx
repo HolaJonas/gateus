@@ -24,7 +24,7 @@ export default function AlignedHandles({
         <Handle
           key={i}
           type={type}
-          id={`input-${i}`}
+          id={type === "target" ? `target-${i}` : `source-${i}`}
           position={type === "target" ? Position.Bottom : Position.Top}
           style={{
             left: `${((i + 1) * 100) / (numberOfHandles + 1)}%`,

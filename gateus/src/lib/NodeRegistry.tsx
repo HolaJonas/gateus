@@ -53,16 +53,20 @@ const XorNode = (props: any) => (
   />
 );
 
-const CustomNode = (props: any) => (
+const OutputNode = (props: any) => (
   <BaseNode
     {...props}
-    design={<div className="bg-white w-10 h-16 flex" />}
-    logicFunction={() => true}
-    defaultIn={0}
-    defaultOut={1}
-    category="custom"
+    design={<div className="w-9 h-9 bg-gray-500 flex" />}
+    logicFunction={(input) =>
+      input[0]
+    }
+    defaultOut={0}
+    defaultIn={1}
     dynamicHandles={false}
+    category="output"
   />
-);
+)
 
-export { AndNode, NotNode, SourceNode, XorNode, CustomNode };
+import CustomNode from "../components/canvas/CustomNode";
+
+export { AndNode, NotNode, SourceNode, XorNode, OutputNode, CustomNode };
