@@ -22,6 +22,15 @@ export default function TabContainers(props: TabContainersProps) {
             props.setActiveTabId(tabId);
           }}
           label={flow.label}
+          setLabel={(label: string) =>
+            props.setFlows((prev) => ({
+              ...prev,
+              [props.activeTabId]: {
+                ...prev[props.activeTabId],
+                label: label,
+              },
+            }))
+          }
         />
       ))}
       <li
