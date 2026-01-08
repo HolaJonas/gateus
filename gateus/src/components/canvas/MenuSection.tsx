@@ -5,7 +5,10 @@ interface MenuSectionProps {
   children: ReactNode;
 }
 
-export default function MenuSection({ sectionHeader, children }: MenuSectionProps) {
+export default function MenuSection({
+  sectionHeader,
+  children,
+}: MenuSectionProps) {
   return (
     <div className="w-full mb-4">
       <h3 className="mb-2 font-medium">{sectionHeader}</h3>

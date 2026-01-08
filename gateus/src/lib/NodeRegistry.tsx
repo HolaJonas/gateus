@@ -1,4 +1,5 @@
 import BaseNode from "../components/canvas/BaseNode";
+import { getNodeDesign } from "./NodeDesigns";
 
 /**
  * The collection of preset node implementations.
@@ -10,7 +11,7 @@ const AndNode = (props: any) => (
   <BaseNode
     {...props}
     dynamicHandles={true}
-    design={<div className="rounded-t-xl bg-red-600 w-10 h-7" />}
+    design={getNodeDesign("andNode")}
     logicFunction={(input) => input.every((value) => value === true)}
     category="gates"
   />
@@ -18,7 +19,7 @@ const AndNode = (props: any) => (
 const NotNode = (props: any) => (
   <BaseNode
     {...props}
-    design={<div className="w-5 h-5 flex bg-blue-600" />}
+    design={getNodeDesign("notNode")}
     logicFunction={(input) => !input[0]}
     defaultIn={1}
     dynamicHandles={false}
@@ -31,7 +32,7 @@ const SourceNode = (props: any) => (
     {...props}
     defaultOut={1}
     defaultIn={0}
-    design={<div className="w-7 h-7 flex bg-orange-500 rounded-full" />}
+    design={getNodeDesign("sourceNode")}
     logicFunction={() => Boolean(props.data.value)}
     dynamicHandles={false}
     interactable={true}
@@ -43,11 +44,11 @@ const SourceNode = (props: any) => (
 const XorNode = (props: any) => (
   <BaseNode
     {...props}
-    design={<div className="w-9 h-9 bg-cyan-600 flex" />}
+    design={getNodeDesign("xorNode")}
     logicFunction={(input) =>
       (!input[0] && input[1]) || (input[0] && !input[1])
     }
-    defaultIn={3}
+    defaultIn={2}
     dynamicHandles={false}
     category="gate"
   />
@@ -56,16 +57,14 @@ const XorNode = (props: any) => (
 const OutputNode = (props: any) => (
   <BaseNode
     {...props}
-    design={<div className="w-9 h-9 bg-gray-500 flex" />}
-    logicFunction={(input) =>
-      input[0]
-    }
+    design={getNodeDesign("outputNode")}
+    logicFunction={(input) => input[0]}
     defaultOut={0}
     defaultIn={1}
     dynamicHandles={false}
     category="output"
   />
-)
+);
 
 import CustomNode from "../components/canvas/CustomNode";
 

@@ -3,6 +3,7 @@ import MenuSection from "./MenuSection";
 import { useDnD } from "./DnDContext";
 import type { DragEvent, MouseEvent } from "react";
 import type { FlowTab } from "./Canvas";
+import { nodeDesigns } from "../../lib/NodeDesigns";
 
 interface GateMenuProps {
   flows: Record<string, FlowTab>;
@@ -27,8 +28,7 @@ export default function GateMenu(props: GateMenuProps) {
 
   return (
     <WindowComponent
-      w={400}
-      h={300}
+      w={300}
       x={100}
       y={100}
       windowColor="blue-500/20"
@@ -37,63 +37,58 @@ export default function GateMenu(props: GateMenuProps) {
       windowBorder={1}
       windowShadow="lg"
       boundary={true}
-      maxW={200}
-      maxH={300}
+      maxW={300}
+      maxH={800}
     >
       <div className="p-5">
         <MenuSection sectionHeader="Test">
-          <div className="flex p-1 gap-1">
-            <div
-              className="w-10 h-10 bg-green-600 cursor-grab active:cursor-grabbing"
-              onDragStart={(event) => onDragStart(event, "sourceNode")}
-              onMouseDown={onMouseDown}
-              draggable
-            />
-            <div
-              className="w-10 h-10 bg-yellow-600 cursor-grab active:cursor-grabbing"
-              onDragStart={(event) => onDragStart(event, "andNode")}
-              onMouseDown={onMouseDown}
-              draggable
-            />
-            <div
-              className="w-10 h-10 bg-green-600 cursor-grab active:cursor-grabbing"
-              onDragStart={(event) => onDragStart(event, "notNode")}
-              onMouseDown={onMouseDown}
-              draggable
-            />
-            <div
-              className="w-10 h-10 bg-yellow-600 cursor-grab active:cursor-grabbing"
-              onDragStart={(event) => onDragStart(event, "xorNode")}
-              onMouseDown={onMouseDown}
-              draggable
-            />
-            <div
-              className="w-10 h-10 bg-lime-500 cursor-grab active:cursor-grabbing"
-              onDragStart={(event) => onDragStart(event, "outputNode")}
-              onMouseDown={onMouseDown}
-              draggable
-            />
-          </div>
-        </MenuSection>
-        <MenuSection sectionHeader="Custom">
-          <div className="flex p-1 gap-1">
-            {Object.entries(props.flows)
-              .filter(([tabId]) => tabId !== props.activeTabId)
-              .map(([tabId, flow]) => (
+          <div className="flex flex-wrap p-1 gap-1">
+            {Object.entries(nodeDesigns).map(([type, design]) => (
+              <div key={type} className="flex flex-col items-center gap-1">
                 <div
-                  key={tabId}
-                  className="w-10 h-10 bg-orange-500 cursor-grab active:cursor-grabbing"
-                  onDragStart={(event) =>
-                    onDragStart(event, "customNode", flow)
-                  }
+                  className="opacity-50 cursor-grab active:cursor-grabbing"
+                  onDragStart={(event) => onDragStart(event, type)}
                   onMouseDown={onMouseDown}
                   draggable
                 >
-                  {flow.label}
+                  <div className="brightness-75">{design}</div>
                 </div>
-              ))}
+                <span className="text-xs text-center">
+                  {type
+                    .replaceAll("Node", "")
+                    .replace(type[0], type[0].toLocaleUpperCase())}
+                </span>
+              </div>
+            ))}
           </div>
         </MenuSection>
+        {Object.entries(props.flows).length > 1 ? (
+          <MenuSection sectionHeader="Custom">
+            <div className="flex flex-wrap p-1 gap-1">
+              {Object.entries(props.flows)
+                .filter(([tabId]) => tabId !== props.activeTabId)
+                .map(([tabId, flow]) => (
+                  <div
+                    key={tabId}
+                    className="opacity-50 cursor-grab active:cursor-grabbing"
+                    onDragStart={(event) =>
+                      onDragStart(event, "customNode", flow)
+                    }
+                    onMouseDown={onMouseDown}
+                    draggable
+                  >
+                    <div className="brightness-75">
+                      <div className="w-20 h-20 bg-purple-600 rounded-lg flex items-center justify-center text-white text-xs font-bold p-2">
+                        {flow.label}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </MenuSection>
+        ) : (
+          ""
+        )}
       </div>
     </WindowComponent>
   );

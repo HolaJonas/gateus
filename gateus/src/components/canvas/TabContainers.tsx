@@ -40,7 +40,7 @@ export default function TabContainers(props: TabContainersProps) {
 
   return (
     <>
-      <ConfirmDialog 
+      <ConfirmDialog
         className="!bg-slate-800 !border-2 !border-slate-600 !rounded-lg !shadow-xl"
         contentClassName="!bg-slate-800 !text-white"
         headerClassName="!bg-slate-700 !text-white !border-b !border-slate-600"
@@ -81,6 +81,7 @@ export default function TabContainers(props: TabContainersProps) {
                 edges: [],
               },
             }));
+            props.setActiveTabId(flowId);
           }}
         >
           {"+"}
