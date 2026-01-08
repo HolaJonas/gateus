@@ -136,6 +136,30 @@ export function CanvasContent() {
     }));
   };
 
+  const onNodesDelete = (tabId: string, params: Node[]) => {
+    const tab = flows[tabId];
+    const toBeDeletedNodes = new Set<String>();
+    params.forEach((node: Node) => {
+      tab.nodes
+        .filter(
+          (x) => x.id === node.id || x.data.parentCustomNodeId === node.id
+        )
+        .forEach((x) => toBeDeletedNodes.add(x.id));
+    });
+    const newNodes = tab.nodes.filter((x) => !toBeDeletedNodes.has(x.id));
+    const newEdges = tab.edges.filter(
+      (x) => !toBeDeletedNodes.has(x.source) && !toBeDeletedNodes.has(x.target)
+    );
+    setFlows((prev) => ({
+      ...prev,
+      [tabId]: {
+        ...prev[tabId],
+        nodes: newNodes,
+        edges: newEdges,
+      },
+    }));
+  };
+
   return (
     <>
       <TabContainers
@@ -151,6 +175,7 @@ export function CanvasContent() {
           edges={activeFlow.edges}
           onNodesChange={(changes) => onNodesChange(activeTabId, changes)}
           onEdgesChange={(changes) => onEdgesChange(activeTabId, changes)}
+          onNodesDelete={(changes) => onNodesDelete(activeTabId, changes)}
           onConnect={(params) => onConnect(activeTabId, params)}
           onDrop={onDrop}
           onDragOver={onDragOver}

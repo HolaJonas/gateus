@@ -121,7 +121,8 @@ const createHiddenOutputNodes = (
 
 const createRegularNodes = (
   flow: FlowTab,
-  nodeIdMap: Map<string, string>
+  nodeIdMap: Map<string, string>,
+  customNodeId: string
 ): Node[] => {
   const newNodes: Node[] = [];
 
@@ -136,6 +137,7 @@ const createRegularNodes = (
       data: {
         ...node.data,
         label: `${flow.label}_${node.data.label || node.id}`,
+        parentCustomNodeId: customNodeId,
       },
       style: { opacity: 0, pointerEvents: "none" },
       selectable: false,
@@ -211,7 +213,7 @@ export const addFlowFromFlowTab = (
     hiddenOutputNodeIds
   );
 
-  const regularNodes = createRegularNodes(flow, nodeIdMap);
+  const regularNodes = createRegularNodes(flow, nodeIdMap, customNodeId);
   const newEdges = createFlowEdges(flow, nodeIdMap);
 
   const allNodes = [
