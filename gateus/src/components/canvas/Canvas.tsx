@@ -26,10 +26,12 @@ import GateMenu from "./GateMenu";
 import { DnDProvider, useDnD } from "./DnDContext";
 import TabContainers from "./TabContainers";
 import { addFlowFromFlowTab } from "./CustomNodeHandler";
+import ColorWheel from "./ColorWheel";
 
 export type FlowTab = {
   id: string;
   label: string;
+  color: string;
   nodes: Node[];
   edges: Edge[];
 };
@@ -47,10 +49,12 @@ export const getId = () => `dndnode_${id++}`;
 export function CanvasContent() {
   const reactFlowWrapper = useRef(null);
   const [activeTabId, setActiveTabId] = useState<string>("tab0");
+  const [showColorWheel, setShowColorWheel] = useState(false);
   const [flows, setFlows] = useState<Record<string, FlowTab>>({
     tab0: {
       id: "0",
       label: "Flow 0",
+      color: "#eab308",
       nodes: [
         {
           id: "1",
@@ -167,9 +171,25 @@ export function CanvasContent() {
         flows={flows}
         setActiveTabId={setActiveTabId}
         setFlows={setFlows}
+        setShowColorWheel={setShowColorWheel}
       />
       <div className="w-full h-full" ref={reactFlowWrapper}>
         <GateMenu flows={flows} activeTabId={activeTabId} />
+        {showColorWheel && (
+          <ColorWheel
+            setShowColorWheel={setShowColorWheel}
+            currentColor={activeFlow.color}
+            onColorChange={(color) => {
+              setFlows((prev) => ({
+                ...prev,
+                [activeTabId]: {
+                  ...prev[activeTabId],
+                  color: color,
+                },
+              }));
+            }}
+          />
+        )}
         <ReactFlow
           nodes={activeFlow.nodes}
           edges={activeFlow.edges}

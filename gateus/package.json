@@ -10,9 +10,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@uiw/react-color-wheel": "^2.9.2",
     "@xyflow/react": "^12.10.0",
+    "bootstrap": "^5.3.8",
     "primereact": "^10.9.7",
     "react": "^19.2.0",
+    "react-bootstrap": "^2.10.10",
     "react-dom": "^19.2.0",
     "react-flexi-window": "^1.0.4",
     "react-icons": "^5.5.0"

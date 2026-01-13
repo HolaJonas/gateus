@@ -16,6 +16,7 @@ export default function CustomNode(props: NodeProps) {
 
   const numberOfInputs = Number(props.data.numberOfInputs) || 0;
   const numberOfOutputs = Number(props.data.numberOfOutputs) || 0;
+  const nodeColor = (props.data.color as string) || "#eab308";
   const hiddenSourceNodeIds =
     (props.data.hiddenSourceNodeIds as string[]) || [];
   const hiddenOutputNodeIds =
@@ -68,7 +69,10 @@ export default function CustomNode(props: NodeProps) {
       className={props.data.value ? "opacity-100" : "opacity-50"}
     >
       <div className={props.data.value ? "brightness-125" : "brightness-75"}>
-        <div className="w-20 h-20 bg-purple-600 rounded-lg flex items-center justify-center text-white text-xs font-bold p-2">
+        <div
+          className="w-20 h-20 rounded-lg flex items-center justify-center text-white text-xs font-bold p-2"
+          style={{ backgroundColor: nodeColor }}
+        >
           {String(props.data.label) || "Custom"}
         </div>
       </div>

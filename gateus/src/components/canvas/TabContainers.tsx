@@ -7,6 +7,7 @@ interface TabContainersProps {
   setActiveTabId: (id: string) => void;
   activeTabId: string;
   setFlows: (flow: React.SetStateAction<Record<string, FlowTab>>) => void;
+  setShowColorWheel: (b: boolean) => void;
 }
 
 let tabId = 0;
@@ -51,6 +52,8 @@ export default function TabContainers(props: TabContainersProps) {
         {Object.entries(props.flows).map(([tabId, flow]) => (
           <TabContainer
             selected={tabId === props.activeTabId}
+            tabColor={flow.color}
+            setShowColorWheel={props.setShowColorWheel}
             key={tabId}
             onClick={() => {
               props.setActiveTabId(tabId);
@@ -77,6 +80,7 @@ export default function TabContainers(props: TabContainersProps) {
               [flowId]: {
                 id: String(tabId),
                 label: String(tabId),
+                color: "#eab308",
                 nodes: [],
                 edges: [],
               },

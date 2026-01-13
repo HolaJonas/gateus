@@ -78,7 +78,10 @@ export default function GateMenu(props: GateMenuProps) {
                     draggable
                   >
                     <div className="brightness-75">
-                      <div className="w-20 h-20 bg-purple-600 rounded-lg flex items-center justify-center text-white text-xs font-bold p-2">
+                      <div
+                        className="w-20 h-20 rounded-lg flex items-center justify-center text-white text-xs font-bold p-2"
+                        style={{ backgroundColor: flow.color || "#eab308" }}
+                      >
                         {flow.label}
                       </div>
                     </div>
