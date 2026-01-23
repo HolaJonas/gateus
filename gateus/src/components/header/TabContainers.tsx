@@ -1,4 +1,4 @@
-import type { FlowTab } from "./Canvas";
+import type { FlowTab } from "../canvas/Canvas";
 import TabContainer from "./TabContainer";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmDialog";
 
@@ -26,7 +26,7 @@ export default function TabContainers(props: TabContainersProps) {
           if (tabId === props.activeTabId) {
             const allTabs = Object.entries(props.flows);
             props.setActiveTabId(
-              allTabs[props.activeTabId === allTabs[0][0] ? 1 : 0][0]
+              allTabs[props.activeTabId === allTabs[0][0] ? 1 : 0][0],
             );
           }
           props.setFlows((prev) => {

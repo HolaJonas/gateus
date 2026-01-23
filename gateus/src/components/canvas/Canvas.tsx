@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ReactFlow,
   addEdge,
@@ -12,6 +12,8 @@ import {
   useReactFlow,
   applyNodeChanges,
   applyEdgeChanges,
+  type NodeChange,
+  type EdgeChange,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import {
@@ -24,9 +26,10 @@ import {
 } from "../../lib/NodeRegistry";
 import GateMenu from "./GateMenu";
 import { DnDProvider, useDnD } from "./DnDContext";
-import TabContainers from "./TabContainers";
+import TabContainers from "../header/TabContainers";
 import { addFlowFromFlowTab } from "./CustomNodeHandler";
 import ColorWheel from "./ColorWheel";
+import useUndoRedoKeys from "../../hooks/useUndoRedoKeys";
 
 export type FlowTab = {
   id: string;
@@ -37,7 +40,7 @@ export type FlowTab = {
 };
 
 let id = 0;
-export const getId = () => `dndnode_${id++}`;
+export const getId = () => `node_${id++}`;
 
 /**
  * A component containing a ReactFlow component with Controls, a Menu and a grid-Background.
@@ -55,17 +58,87 @@ export function CanvasContent() {
       id: "0",
       label: "Flow 0",
       color: "#eab308",
-      nodes: [
-        {
-          id: "1",
-          position: { x: 0, y: 0 },
-          type: "sourceNode",
-          data: { label: "Node 1" },
-        },
-      ],
+      nodes: [],
       edges: [],
     },
   });
+
+  const [tabHistories, setTabHistories] = useState<Record<string, any>>({});
+
+  const undo = () => {
+    const history = tabHistories[activeTabId];
+    if (!history || history.past.length === 0) return;
+
+    const previous = history.past[history.past.length - 1];
+    const newPast = history.past.slice(0, history.past.length - 1);
+
+    setTabHistories((prev) => ({
+      ...prev,
+      [activeTabId]: {
+        past: newPast,
+        present: previous,
+        future: [history.present, ...history.future],
+      },
+    }));
+
+    setFlows((prev) => ({
+      ...prev,
+      [activeTabId]: previous,
+    }));
+  };
+
+  const redo = () => {
+    const history = tabHistories[activeTabId];
+    if (!history || history.future.length === 0) return;
+
+    const next = history.future[0];
+    const newFuture = history.future.slice(1);
+
+    setTabHistories((prev) => ({
+      ...prev,
+      [activeTabId]: {
+        past: [...history.past, history.present],
+        present: next,
+        future: newFuture,
+      },
+    }));
+
+    setFlows((prev) => ({
+      ...prev,
+      [activeTabId]: next,
+    }));
+  };
+
+  useUndoRedoKeys(undo, redo);
+
+  const setUndoableFlowsState = (f: any) => {
+    const newFlows = typeof f === "function" ? f(flows) : f;
+    const newTab = newFlows[activeTabId];
+    const history = tabHistories[activeTabId];
+    const currentTab = flows[activeTabId];
+
+    if (!history) {
+      setTabHistories((prev) => ({
+        ...prev,
+        [activeTabId]: {
+          past: [currentTab],
+          present: newTab,
+          future: [],
+        },
+      }));
+    } else {
+      setTabHistories((prev) => ({
+        ...prev,
+        [activeTabId]: {
+          past: [...history.past, history.present],
+          present: newTab,
+          future: [],
+        },
+      }));
+    }
+
+    setFlows(newFlows);
+  };
 
   const [type] = useDnD();
   const { screenToFlowPosition } = useReactFlow();
@@ -88,16 +161,21 @@ export function CanvasContent() {
         y: event.clientY,
       });
       if (type.type === "customNode" && type.flow) {
-        addFlowFromFlowTab(type.flow, setFlows, activeTabId, position);
+        addFlowFromFlowTab(
+          type.flow,
+          setUndoableFlowsState,
+          activeTabId,
+          position,
+        );
         return;
       }
-      const newNode: any = {
+      const newNode: Node = {
         id: getId(),
         type: type.type,
-        position,
+        position: position,
         data: { value: false },
       };
-      setFlows((prev) => ({
+      setUndoableFlowsState((prev: Record<string, FlowTab>) => ({
         ...prev,
         [activeTabId]: {
           ...prev[activeTabId],
@@ -105,23 +183,37 @@ export function CanvasContent() {
         },
       }));
     },
-    [screenToFlowPosition, type, activeTabId]
+    [screenToFlowPosition, type, activeTabId, flows],
   );
 
   const activeFlow = flows[activeTabId];
 
-  const onNodesChange = (tabId: string, changes: any) => {
-    setFlows((prev) => ({
-      ...prev,
-      [tabId]: {
-        ...prev[tabId],
-        nodes: applyNodeChanges(changes, prev[tabId].nodes),
-      },
-    }));
+  const onNodesChange = (tabId: string, changes: NodeChange[]) => {
+    const change = changes[0];
+    if (
+      change.type === "position" &&
+      "dragging" in change &&
+      !change.dragging
+    ) {
+      setUndoableFlowsState((prev: Record<string, FlowTab>) => ({
+        ...prev,
+        [tabId]: {
+          ...prev[tabId],
+          nodes: applyNodeChanges(changes, prev[tabId].nodes),
+        },
+      }));
+    } else
+      setFlows((prev: Record<string, FlowTab>) => ({
+        ...prev,
+        [tabId]: {
+          ...prev[tabId],
+          nodes: applyNodeChanges(changes, prev[tabId].nodes),
+        },
+      }));
   };
 
-  const onEdgesChange = (tabId: string, changes: any) => {
-    setFlows((prev) => ({
+  const onEdgesChange = (tabId: string, changes: EdgeChange[]) => {
+    setUndoableFlowsState((prev: Record<string, FlowTab>) => ({
       ...prev,
       [tabId]: {
         ...prev[tabId],
@@ -131,7 +223,7 @@ export function CanvasContent() {
   };
 
   const onConnect = (tabId: string, params: any) => {
-    setFlows((prev) => ({
+    setUndoableFlowsState((prev: Record<string, FlowTab>) => ({
       ...prev,
       [tabId]: {
         ...prev[tabId],
@@ -146,15 +238,15 @@ export function CanvasContent() {
     params.forEach((node: Node) => {
       tab.nodes
         .filter(
-          (x) => x.id === node.id || x.data.parentCustomNodeId === node.id
+          (x) => x.id === node.id || x.data.parentCustomNodeId === node.id,
         )
         .forEach((x) => toBeDeletedNodes.add(x.id));
     });
     const newNodes = tab.nodes.filter((x) => !toBeDeletedNodes.has(x.id));
     const newEdges = tab.edges.filter(
-      (x) => !toBeDeletedNodes.has(x.source) && !toBeDeletedNodes.has(x.target)
+      (x) => !toBeDeletedNodes.has(x.source) && !toBeDeletedNodes.has(x.target),
     );
-    setFlows((prev) => ({
+    setUndoableFlowsState((prev: Record<string, FlowTab>) => ({
       ...prev,
       [tabId]: {
         ...prev[tabId],
@@ -170,7 +262,7 @@ export function CanvasContent() {
         activeTabId={activeTabId}
         flows={flows}
         setActiveTabId={setActiveTabId}
-        setFlows={setFlows}
+        setFlows={setUndoableFlowsState}
         setShowColorWheel={setShowColorWheel}
       />
       <div className="w-full h-full" ref={reactFlowWrapper}>
@@ -180,7 +272,7 @@ export function CanvasContent() {
             setShowColorWheel={setShowColorWheel}
             currentColor={activeFlow.color}
             onColorChange={(color) => {
-              setFlows((prev) => ({
+              setUndoableFlowsState((prev: Record<string, FlowTab>) => ({
                 ...prev,
                 [activeTabId]: {
                   ...prev[activeTabId],
