@@ -1,4 +1,4 @@
-import type { FlowTab } from "../canvas/Canvas";
+import type { FlowTab } from "../../types/flowTab";
 import TabContainer from "./TabContainer";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmDialog";
 

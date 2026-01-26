@@ -28,7 +28,11 @@ export const tabHistorySlice = createSlice({
   reducers: {
     recordAction: (
       state,
-      action: PayloadAction<{ tabId: string; flowTab: FlowTab; currentFlowTab?: FlowTab }>,
+      action: PayloadAction<{
+        tabId: string;
+        flowTab: FlowTab;
+        currentFlowTab?: FlowTab;
+      }>,
     ) => {
       const { tabId, flowTab, currentFlowTab } = action.payload;
       const history = state.histories[tabId];

@@ -2,7 +2,7 @@ import WindowComponent from "react-flexi-window";
 import MenuSection from "./MenuSection";
 import { useDnD } from "./DnDContext";
 import type { DragEvent, MouseEvent } from "react";
-import type { FlowTab } from "./Canvas";
+import type { FlowTab } from "../../types/flowTab";
 import { nodeDesigns } from "../../lib/NodeDesigns";
 
 interface GateMenuProps {

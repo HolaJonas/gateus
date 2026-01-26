@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
-import type { FlowTab } from "./Canvas";
+import type { FlowTab } from "../../types/flowTab"; 
 
 type DnDState = {
   type: string | null;
