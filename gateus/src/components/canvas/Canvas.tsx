@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
   ReactFlow,
   addEdge,
@@ -30,6 +30,12 @@ import TabContainers from "../header/TabContainers";
 import { addFlowFromFlowTab } from "./CustomNodeHandler";
 import ColorWheel from "./ColorWheel";
 import useUndoRedoKeys from "../../hooks/useUndoRedoKeys";
+import { useAppDispatch, useAppSelector } from "../../hooks/reduxHooks";
+import {
+  recordAction,
+  undo as undoAction,
+  redo as redoAction,
+} from "./flowsSlice";
 
 export type FlowTab = {
   id: string;
@@ -63,23 +69,17 @@ export function CanvasContent() {
     },
   });
 
-  const [tabHistories, setTabHistories] = useState<Record<string, any>>({});
+  const dispatch = useAppDispatch();
+  const tabHistories = useAppSelector(
+    (state) => state.tabHistorySlice.histories,
+  );
 
   const undo = () => {
     const history = tabHistories[activeTabId];
     if (!history || history.past.length === 0) return;
 
     const previous = history.past[history.past.length - 1];
-    const newPast = history.past.slice(0, history.past.length - 1);
-
-    setTabHistories((prev) => ({
-      ...prev,
-      [activeTabId]: {
-        past: newPast,
-        present: previous,
-        future: [history.present, ...history.future],
-      },
-    }));
+    dispatch(undoAction(activeTabId));
 
     setFlows((prev) => ({
       ...prev,
@@ -92,16 +92,7 @@ export function CanvasContent() {
     if (!history || history.future.length === 0) return;
 
     const next = history.future[0];
-    const newFuture = history.future.slice(1);
-
-    setTabHistories((prev) => ({
-      ...prev,
-      [activeTabId]: {
-        past: [...history.past, history.present],
-        present: next,
-        future: newFuture,
-      },
-    }));
+    dispatch(redoAction(activeTabId));
 
     setFlows((prev) => ({
       ...prev,
@@ -114,28 +105,15 @@ export function CanvasContent() {
   const setUndoableFlowsState = (f: any) => {
     const newFlows = typeof f === "function" ? f(flows) : f;
     const newTab = newFlows[activeTabId];
-    const history = tabHistories[activeTabId];
     const currentTab = flows[activeTabId];
 
-    if (!history) {
-      setTabHistories((prev) => ({
-        ...prev,
-        [activeTabId]: {
-          past: [currentTab],
-          present: newTab,
-          future: [],
-        },
-      }));
-    } else {
-      setTabHistories((prev) => ({
-        ...prev,
-        [activeTabId]: {
-          past: [...history.past, history.present],
-          present: newTab,
-          future: [],
-        },
-      }));
-    }
+    dispatch(
+      recordAction({
+        tabId: activeTabId,
+        flowTab: newTab,
+        currentFlowTab: currentTab,
+      }),
+    );
 
     setFlows(newFlows);
   };
