@@ -2,6 +2,7 @@ import {
   useNodeConnections,
   useNodesData,
   useReactFlow,
+  useUpdateNodeInternals,
   type NodeProps,
 } from "@xyflow/react";
 import { useEffect, useState, type ReactNode, useCallback } from "react";
@@ -68,6 +69,7 @@ export default function BaseNode({
   const sourceNodeIds = connections.map((conn) => conn.source);
   const connectedNodesData = useNodesData(sourceNodeIds);
   const { updateNodeData } = useReactFlow();
+  const updateNodeInternals = useUpdateNodeInternals();
 
   const handleToggle = useCallback(() => {
     updateNodeData(id, { value: !data.value });
@@ -117,7 +119,8 @@ export default function BaseNode({
   ]);
 
   if (dynamicHandles) useNumberKeys(selected, setHandleCount);
-  if (rotatable) useDirectionKeys(selected, setDirection);
+  if (rotatable)
+    useDirectionKeys(selected, setDirection, updateNodeInternals, id);
   if (interactable) useInteractKey(selected, onInteract || handleToggle);
 
   return (

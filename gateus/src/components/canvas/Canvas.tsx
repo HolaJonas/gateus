@@ -158,7 +158,7 @@ export function CanvasContent() {
             outputNode: OutputNode,
             customNode: CustomNode,
           }}
-          defaultEdgeOptions={{ type: "smoothstep" }}
+          defaultEdgeOptions={{ type: "straight" }}
           fitView
           proOptions={{ hideAttribution: true }}
         >
