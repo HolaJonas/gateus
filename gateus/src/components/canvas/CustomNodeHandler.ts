@@ -1,5 +1,6 @@
 import { type Node, type Edge, type XYPosition } from "@xyflow/react";
-import { getId, type FlowTab } from "./Canvas";
+import { getId } from "./Canvas";
+import type { FlowTab } from "../../types/flowTab";
 import type { Dispatch, SetStateAction } from "react";
 
 const position: XYPosition = { x: 0, y: 0 };

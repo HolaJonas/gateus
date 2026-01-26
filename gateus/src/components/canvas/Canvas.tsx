@@ -1,19 +1,11 @@
-import { useCallback, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import {
   ReactFlow,
-  addEdge,
   Background,
   BackgroundVariant,
   MiniMap,
   Controls,
-  type Node,
-  type Edge,
   ReactFlowProvider,
-  useReactFlow,
-  applyNodeChanges,
-  applyEdgeChanges,
-  type NodeChange,
-  type EdgeChange,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import {
@@ -25,9 +17,8 @@ import {
   CustomNode,
 } from "../../lib/NodeRegistry";
 import GateMenu from "./GateMenu";
-import { DnDProvider, useDnD } from "./DnDContext";
+import { DnDProvider } from "./DnDContext";
 import TabContainers from "../header/TabContainers";
-import { addFlowFromFlowTab } from "./CustomNodeHandler";
 import ColorWheel from "./ColorWheel";
 import useUndoRedoKeys from "../../hooks/useUndoRedoKeys";
 import { useAppDispatch, useAppSelector } from "../../hooks/reduxHooks";
@@ -36,14 +27,9 @@ import {
   undo as undoAction,
   redo as redoAction,
 } from "./flowsSlice";
-
-export type FlowTab = {
-  id: string;
-  label: string;
-  color: string;
-  nodes: Node[];
-  edges: Edge[];
-};
+import { useDnDHandler } from "../../hooks/useDnDHandler";
+import { useCanvasInteraction } from "../../hooks/useCanvasInteraction";
+import type { FlowTab } from "../../types/flowTab";
 
 let id = 0;
 export const getId = () => `node_${id++}`;
@@ -118,121 +104,16 @@ export function CanvasContent() {
     setFlows(newFlows);
   };
 
-  const [type] = useDnD();
-  const { screenToFlowPosition } = useReactFlow();
-
-  const onDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    if (event.dataTransfer) {
-      event.dataTransfer.dropEffect = "move";
-    }
-  }, []);
-
-  const onDrop = useCallback(
-    (event: React.DragEvent<HTMLDivElement>) => {
-      event.preventDefault();
-      if (!type.type) {
-        return;
-      }
-      const position = screenToFlowPosition({
-        x: event.clientX,
-        y: event.clientY,
-      });
-      if (type.type === "customNode" && type.flow) {
-        addFlowFromFlowTab(
-          type.flow,
-          setUndoableFlowsState,
-          activeTabId,
-          position,
-        );
-        return;
-      }
-      const newNode: Node = {
-        id: getId(),
-        type: type.type,
-        position: position,
-        data: { value: false },
-      };
-      setUndoableFlowsState((prev: Record<string, FlowTab>) => ({
-        ...prev,
-        [activeTabId]: {
-          ...prev[activeTabId],
-          nodes: prev[activeTabId].nodes.concat(newNode),
-        },
-      }));
-    },
-    [screenToFlowPosition, type, activeTabId, flows],
-  );
-
   const activeFlow = flows[activeTabId];
 
-  const onNodesChange = (tabId: string, changes: NodeChange[]) => {
-    const change = changes[0];
-    if (
-      change.type === "position" &&
-      "dragging" in change &&
-      !change.dragging
-    ) {
-      setUndoableFlowsState((prev: Record<string, FlowTab>) => ({
-        ...prev,
-        [tabId]: {
-          ...prev[tabId],
-          nodes: applyNodeChanges(changes, prev[tabId].nodes),
-        },
-      }));
-    } else
-      setFlows((prev: Record<string, FlowTab>) => ({
-        ...prev,
-        [tabId]: {
-          ...prev[tabId],
-          nodes: applyNodeChanges(changes, prev[tabId].nodes),
-        },
-      }));
-  };
+  const { onDragOver, onDrop } = useDnDHandler(
+    setUndoableFlowsState,
+    activeTabId,
+    flows,
+  );
 
-  const onEdgesChange = (tabId: string, changes: EdgeChange[]) => {
-    setUndoableFlowsState((prev: Record<string, FlowTab>) => ({
-      ...prev,
-      [tabId]: {
-        ...prev[tabId],
-        edges: applyEdgeChanges(changes, prev[tabId].edges),
-      },
-    }));
-  };
-
-  const onConnect = (tabId: string, params: any) => {
-    setUndoableFlowsState((prev: Record<string, FlowTab>) => ({
-      ...prev,
-      [tabId]: {
-        ...prev[tabId],
-        edges: addEdge(params, prev[tabId].edges),
-      },
-    }));
-  };
-
-  const onNodesDelete = (tabId: string, params: Node[]) => {
-    const tab = flows[tabId];
-    const toBeDeletedNodes = new Set<String>();
-    params.forEach((node: Node) => {
-      tab.nodes
-        .filter(
-          (x) => x.id === node.id || x.data.parentCustomNodeId === node.id,
-        )
-        .forEach((x) => toBeDeletedNodes.add(x.id));
-    });
-    const newNodes = tab.nodes.filter((x) => !toBeDeletedNodes.has(x.id));
-    const newEdges = tab.edges.filter(
-      (x) => !toBeDeletedNodes.has(x.source) && !toBeDeletedNodes.has(x.target),
-    );
-    setUndoableFlowsState((prev: Record<string, FlowTab>) => ({
-      ...prev,
-      [tabId]: {
-        ...prev[tabId],
-        nodes: newNodes,
-        edges: newEdges,
-      },
-    }));
-  };
+  const { onNodesChange, onEdgesChange, onConnect, onNodesDelete } =
+    useCanvasInteraction(setUndoableFlowsState, setFlows, flows);
 
   return (
     <>
