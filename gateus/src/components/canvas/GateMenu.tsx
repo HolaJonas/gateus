@@ -4,6 +4,8 @@ import { useDnD } from "./DnDContext";
 import type { DragEvent, MouseEvent } from "react";
 import type { FlowTab } from "../../types/flowTab";
 import { nodeDesigns } from "../../lib/NodeDesigns";
+import { Button } from "react-bootstrap";
+import { useEdgeVisibility } from "./EdgeContext";
 
 interface GateMenuProps {
   flows: Record<string, FlowTab>;
@@ -12,11 +14,12 @@ interface GateMenuProps {
 
 export default function GateMenu(props: GateMenuProps) {
   const [_, setType] = useDnD();
+  const [showBitwidth, setShowBitwidth] = useEdgeVisibility();
 
   const onDragStart = (
     event: DragEvent<HTMLDivElement>,
     nodeType: string,
-    flow?: FlowTab
+    flow?: FlowTab,
   ) => {
     setType?.({ type: nodeType, flow: flow ?? null });
     event.dataTransfer.effectAllowed = "move";
@@ -93,6 +96,10 @@ export default function GateMenu(props: GateMenuProps) {
           ""
         )}
       </div>
+      <Button
+        className="w-10 h-10 bg-black"
+        onClick={() => setShowBitwidth(!showBitwidth)}
+      />
     </WindowComponent>
   );
 }

@@ -2,6 +2,7 @@ import {
   addEdge,
   applyEdgeChanges,
   applyNodeChanges,
+  type Connection,
   type EdgeChange,
   type Node,
   type NodeChange,
@@ -61,12 +62,23 @@ export const useCanvasInteraction = (
     }));
   };
 
-  const onConnect = (tabId: string, params: any) => {
+  const onConnect = (tabId: string, params: Connection) => {
     setUndoableFlowsState((prev: Record<string, FlowTab>) => ({
       ...prev,
       [tabId]: {
         ...prev[tabId],
-        edges: addEdge(params, prev[tabId].edges),
+        edges: addEdge(
+          {
+            ...params,
+            type: "bitTaggedEdge",
+            data: {
+              bitwidth:
+                flows[tabId].nodes.find((k) => k.id === params.source)?.data
+                  ?.bitwidth || 1,
+            },
+          },
+          prev[tabId].edges,
+        ),
       },
     }));
   };

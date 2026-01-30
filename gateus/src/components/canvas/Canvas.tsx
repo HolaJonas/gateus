@@ -5,7 +5,6 @@ import {
   BackgroundVariant,
   MiniMap,
   Controls,
-  ReactFlowProvider,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import {
@@ -17,7 +16,6 @@ import {
   CustomNode,
 } from "../../lib/NodeRegistry";
 import GateMenu from "./GateMenu";
-import { DnDProvider } from "./DnDContext";
 import TabContainers from "../header/TabContainers";
 import ColorWheel from "./ColorWheel";
 import useUndoRedoKeys from "../../hooks/useUndoRedoKeys";
@@ -30,6 +28,8 @@ import {
 import { useDnDHandler } from "../../hooks/useDnDHandler";
 import { useCanvasInteraction } from "../../hooks/useCanvasInteraction";
 import type { FlowTab } from "../../types/flowTab";
+import { BitTaggedEdge } from "./BitTaggedEdge";
+import { CanvasContexts } from "./CanvasContexts";
 
 let id = 0;
 export const getId = () => `node_${id++}`;
@@ -158,6 +158,7 @@ export function CanvasContent() {
             outputNode: OutputNode,
             customNode: CustomNode,
           }}
+          edgeTypes={{ bitTaggedEdge: BitTaggedEdge }}
           defaultEdgeOptions={{ type: "straight" }}
           fitView
           proOptions={{ hideAttribution: true }}
@@ -179,10 +180,8 @@ export function CanvasContent() {
  */
 export default function Canvas() {
   return (
-    <ReactFlowProvider>
-      <DnDProvider>
-        <CanvasContent />
-      </DnDProvider>
-    </ReactFlowProvider>
+    <CanvasContexts>
+      <CanvasContent />
+    </CanvasContexts>
   );
 }
