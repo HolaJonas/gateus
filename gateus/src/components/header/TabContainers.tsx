@@ -48,7 +48,7 @@ export default function TabContainers(props: TabContainersProps) {
         acceptClassName="!bg-red-600 hover:!bg-red-700 !border-0 !text-white !px-4 !py-2 !rounded"
         rejectClassName="!bg-slate-600 hover:!bg-slate-500 !border-0 !text-white !px-4 !py-2 !rounded"
       />
-      <ul className="flex bg-slate-500 gap-2 p-2">
+      <ul className="flex bg-secondary gap-2 p-2">
         {Object.entries(props.flows).map(([tabId, flow]) => (
           <TabContainer
             selected={tabId === props.activeTabId}
@@ -72,7 +72,8 @@ export default function TabContainers(props: TabContainersProps) {
           />
         ))}
         <li
-          className="bg-yellow-500 flex z-10 rounded-md p-1 w-8 h-8 justify-center"
+          className="flex z-10 rounded-md p-1 w-8 h-8 justify-center"
+          style={{background: "#DBA507"}}
           onClick={() => {
             const flowId = getTabId();
             props.setFlows((prev) => ({
@@ -80,7 +81,7 @@ export default function TabContainers(props: TabContainersProps) {
               [flowId]: {
                 id: String(tabId),
                 label: String(tabId),
-                color: "#eab308",
+                color: "#DBA507",
                 nodes: [],
                 edges: [],
               },

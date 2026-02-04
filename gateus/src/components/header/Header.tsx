@@ -1,3 +1,5 @@
+import logo from "../../../public/logo.png";
+
 /**
  * The Header-component for the main screen.
  * Displays buttons within a list centered in the header-bar.
@@ -8,8 +10,8 @@
 export default function Header() {
   return (
     <>
-      <div className="w-full h-16 bg-red-600 shadow border-red-400 border relative flex items-center">
-        Logo
+      <div className="w-full h-20 bg-primary border-primary_border border border-b-2 border-r-2 border-t-0 border-l-0 relative flex items-center shadow-md z-10">
+        <img className="pl-3" src={logo} />
         <div className="absolute left-1/2 -translate-x-1/2 flex gap-10 items-center">
           <a
             href=""

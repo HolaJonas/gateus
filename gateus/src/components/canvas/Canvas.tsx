@@ -49,7 +49,7 @@ export function CanvasContent() {
     tab0: {
       id: "0",
       label: "Flow 0",
-      color: "#eab308",
+      color: "#DBA507",
       nodes: [],
       edges: [],
     },

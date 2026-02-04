@@ -71,7 +71,7 @@ const createCustomNode = (
       value: false,
       category: "custom",
       label: flow.label,
-      color: flow.color || "#eab308",
+      color: flow.color || "#DBA507",
       numberOfInputs: numberOfInputs,
       numberOfOutputs: numberOfOutputs,
       hiddenSourceNodeIds: hiddenSourceNodeIds,

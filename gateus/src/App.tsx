@@ -3,7 +3,7 @@ import Canvas from "./components/canvas/Canvas";
 
 function App() {
   return (
-    <div className="bg-red-100 h-screen flex flex-col">
+    <div className="h-screen flex flex-col" style={{background: "#DAE5E8"}}>
       <Header />
       <Canvas />
     </div>
