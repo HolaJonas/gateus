@@ -14,6 +14,7 @@ import {
   SourceNode,
   XorNode,
   CustomNode,
+  ClockNode,
 } from "../../lib/NodeRegistry";
 import GateMenu from "./GateMenu";
 import TabContainers from "../header/TabContainers";
@@ -157,6 +158,7 @@ export function CanvasContent() {
             xorNode: XorNode,
             outputNode: OutputNode,
             customNode: CustomNode,
+            clockNode: ClockNode,
           }}
           edgeTypes={{ bitTaggedEdge: BitTaggedEdge }}
           defaultEdgeOptions={{ type: "straight" }}

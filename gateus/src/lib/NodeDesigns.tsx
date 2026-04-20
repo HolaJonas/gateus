@@ -6,6 +6,7 @@ export const nodeDesigns: Record<string, ReactNode> = {
   notNode: <div className="w-5 h-5 flex bg-blue-600" />,
   xorNode: <div className="w-9 h-9 bg-cyan-600 flex" />,
   outputNode: <div className="w-9 h-9 bg-gray-500 flex" />,
+  clockNode: <div className="w-9 h-9 flex bg-fuchsia-500 rounded-sm" />,
 };
 
 export const getNodeDesign = (type: string): ReactNode => {

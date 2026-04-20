@@ -28,6 +28,7 @@ interface BaseNodeProps extends NodeProps {
     | "custom";
   logicFunction: (inputs: boolean[]) => boolean;
   onInteract?: () => void;
+  delay: number;
 }
 
 /**
@@ -47,6 +48,7 @@ interface BaseNodeProps extends NodeProps {
  * @param {boolean} [param0.interactable=false] is the node an interaction-node?
  * @param {(inputs: {}) => boolean} param0.logicFunction boolean function of the node
  * @param {() => void} param0.onInteract interaction function of the node
+ * @param {number} [param0.delay=0] is the calculation delay in ms
  * @returns {*}
  */
 export default function BaseNode({
@@ -62,6 +64,7 @@ export default function BaseNode({
   interactable = false,
   logicFunction,
   onInteract,
+  delay = 0,
 }: BaseNodeProps) {
   const [handleCount, setHandleCount] = useState(defaultIn);
   const [direction, setDirection] = useState(0);
@@ -105,7 +108,7 @@ export default function BaseNode({
       connections.length === handleCount ? logicFunction(inputValues) : false;
 
     if (data.value !== result) {
-      updateNodeData(id, { value: result });
+      setTimeout(() => updateNodeData(id, { value: result }), delay);
     }
   }, [
     connectedNodesData,
@@ -116,6 +119,7 @@ export default function BaseNode({
     connections,
     handleCount,
     logicFunction,
+    delay,
   ]);
 
   if (dynamicHandles) useNumberKeys(selected, setHandleCount);
